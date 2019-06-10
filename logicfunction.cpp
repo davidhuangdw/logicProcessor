@@ -59,16 +59,21 @@ LogicFunction *LogicFunctionList::find(const char *name)
 }
 
 
-LogicFunction::LogicFunction(const char *name, int numinputs, const char **table) :
-	m_numinputs(numinputs), m_table(table)
+LogicFunction::LogicFunction(const char *name, int numinputs) :
+        m_numinputs(numinputs)
 {
-	if (LogicFunction *lf = LogicFunctionList::find(name))
-	{
-		fprintf(stderr, "Warning: Duplicate definition of LogicFunction \"%s\"\n", name);
-		delete lf;
-	}
-	m_name = strdup(name);
-	LogicFunctionList::insert(this);
+    if (LogicFunction *lf = LogicFunctionList::find(name))
+    {
+        fprintf(stderr, "Warning: Duplicate definition of LogicFunction \"%s\"\n", name);
+        delete lf;
+    }
+    m_name = strdup(name);
+    LogicFunctionList::insert(this);
+}
+
+LogicFunctionByTable::LogicFunctionByTable(const char *name, int numinputs, const char **table) :
+	m_table(table), LogicFunction(name, numinputs)
+{
 }
 
 LogicFunction::~LogicFunction()
@@ -82,7 +87,7 @@ LogicFunction *LogicFunction::findFunction(const char *name)
 	return LogicFunctionList::find(name);
 }
 
-char LogicFunction::calculate(char *inputs)
+char LogicFunctionByTable::calculate(char *inputs)
 {
 	for (const char **t=m_table; *t ; t++)
 	{

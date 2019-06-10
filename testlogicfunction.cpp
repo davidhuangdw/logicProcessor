@@ -99,6 +99,7 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 
 		for (i=0 ; i<n; i++)
 		{
+            // iterate all permutations by +1 each round: ttftf -> ffttf: "11010"(as reversed number 01011) => "00110"(01100)
 			if (inp[i] == 'f')
 			{
 				inp[i] = 't';
@@ -137,7 +138,7 @@ void function_test ( LogicFunction *func )
 
 int main()
 {
-	LogicFunction
+	LogicFunctionByTable
 		f_not("not",1,not_table),
 		f_and2("and2",2,and2_table),
 		f_and3("and3",3,and3_table),
@@ -147,7 +148,7 @@ int main()
 		f_xor3("xor3",3,xor3_table),
 		f_implies("implies", 2, impl_table);
 
-	LogicFunction
+    LogicFunctionByTable
 		f_incomplete("incomplete",3, incl_table);
 
 // Basic table tests
