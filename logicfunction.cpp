@@ -102,6 +102,36 @@ char LogicFunctionByTable::calculate(char *inputs)
 	return 'x';
 }
 
+char HorizontalCubeLogicFunction::calculate(char *inputs) {
+    for(int i=0; i<m_cubesize; i++){
+        for(int j=0; j<m_cubesize-1-j; j++)
+            if(inputs[i*m_cubesize + j] != inputs[i*m_cubesize + m_cubesize-1-j])
+                return 'f';
+    }
+    return 't';
+}
+
+char VerticalCubeLogicFunction::calculate(char *inputs) {
+    for(int j=0; j<m_cubesize; j++){
+        for(int i=0; i<m_cubesize-1-i; i++)
+            if(inputs[i*m_cubesize+j] != inputs[(m_cubesize-1-i)*m_cubesize+j])
+                return 'f';
+    }
+    return 't';
+}
+
+
+char RotateCubeLogicFunction::calculate(char *inputs) {
+    // (i, j) -> (j, n-1-i) -> (n-1-i, n-1-j) -> (n-1-j, i)
+    for(int i=0; i<m_cubesize; i++)
+        for(int j=0; j<m_cubesize; j++){
+            int from = i*m_cubesize + j;
+            int to = j*m_cubesize + m_cubesize-1-i;
+            if(inputs[from] != inputs[to])
+                return 'f';
+        }
+    return 't';
+}
 
 LogicProcessor::LogicProcessor( LogicFunction *function )
 	: m_logicfunction ( function )

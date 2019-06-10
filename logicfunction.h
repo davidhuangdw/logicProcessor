@@ -39,6 +39,31 @@ public:
     const char **m_table;
 };
 
+class CubeLogicFunction: public LogicFunction {
+public:
+    CubeLogicFunction(const char *name, int cubeSize):
+        m_cubesize(cubeSize),LogicFunction(name, cubeSize*cubeSize){}
+    char calculate(char *inputs){ return 'x'; }
+    int m_cubesize;
+};
+
+class HorizontalCubeLogicFunction: public CubeLogicFunction {
+public:
+    HorizontalCubeLogicFunction(const char *name, int cubeSize): CubeLogicFunction(name, cubeSize){}
+    char calculate(char *inputs);
+};
+
+class VerticalCubeLogicFunction: public CubeLogicFunction {
+public:
+    VerticalCubeLogicFunction(const char *name, int cubeSize): CubeLogicFunction(name, cubeSize){}
+    char calculate(char *inputs);
+};
+
+class RotateCubeLogicFunction: public CubeLogicFunction {
+public:
+    RotateCubeLogicFunction(const char *name, int cubeSize): CubeLogicFunction(name, cubeSize){}
+    char calculate(char *inputs);
+};
 
 class LogicProcessor {
 public:
