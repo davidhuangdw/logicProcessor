@@ -42,6 +42,7 @@ void LogicFunctionList::remove(LogicFunction *f)
 			LogicFunctionElm *next = (*elm)->m_next;
 			delete (*elm);
 			(*elm) = next;
+//            if(!*elm) break;
             return;
 		}
 	}

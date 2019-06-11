@@ -6,18 +6,16 @@
 class LogicFunction {
 public:
 
-    // a logic function take k(numinputs) inputs, and return a single bool value output
-	// inputs/output are char: 't'(true),'f'(false),'x'(unknown)
+    // a bitwise logic function takes k(numinputs) bool value inputs, and outputs a single bool value result
+    // for example: and/or/xor are logic functions takes 2 inputs, 'not' is a logic function take 1 input
+	// here inputs/output use char to represent the bool value: 't'(true),'f'(false),'x'(unknown)
 
-	// @parameter numinputs:
-	//   the size of input for this logic function
 	LogicFunction(const char *name, int numinputs);
 	~LogicFunction();
 
-    // find the existing logicFunction registered as the target name:
 	static LogicFunction *findFunction(const char *name);
 
-    // calculate the logic function result of the numinputs inputs: 't'(true) or 'f'(false) or 'x'(uknown -- cannot be inferred from existing rules):
+    // calculate the logic function result of the numinputs inputs: 't'(true) or 'f'(false) or 'x'(unknown -- cannot be inferred from existing rules):
 	virtual char calculate(char *inputs){ return 'x'; };
 
 	int m_numinputs;

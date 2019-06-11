@@ -200,8 +200,14 @@ int main()
     RotateCubeLogicFunction rotate("rotate_symmetric", cube_size);
     LogicProcessor p_hori(&horizontal), p_vert(&vertical), p_rotate(&rotate);
 
+    char cube[cube_size*cube_size];
+    for(int j=0; j<cube_size*cube_size; j++){
+        p_hori.setInput(j, cube+j);
+        p_vert.setInput(j, cube+j);
+        p_rotate.setInput(j, cube+j);
+    }
+
     for(int i=0; i < sizeof(testcases)/ sizeof(testcases[0]); i++){
-        char cube[cube_size*cube_size];
         printf("test case %i:\n", i);
         for(int row=0; row<cube_size; row++) {
             for (int col = 0; col < cube_size; col++) {
@@ -211,12 +217,6 @@ int main()
             }
             printf("\n");
         }
-        for(int j=0; j<cube_size*cube_size; j++){
-            p_hori.setInput(j, cube+j);
-            p_vert.setInput(j, cube+j);
-            p_rotate.setInput(j, cube+j);
-        }
-
         printf("--> horizontal: %c, vertical: %c, ratate: %c\n", p_hori.process(), p_vert.process(), p_rotate.process());
         printf("---\n");
     }
