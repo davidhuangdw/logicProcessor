@@ -55,7 +55,7 @@ LogicFunction *LogicFunctionList::find(const char *name)
 {
 	for (LogicFunctionElm *elm=head; elm; elm=elm->m_next)
 	{
-		if (0 == strcmp(name, elm->m_function->m_name) )
+		if (0 == strcmp(name, elm->m_function->name()) )
 		{
 			return elm->m_function;
 		}
@@ -84,7 +84,7 @@ LogicFunctionByTable::LogicFunctionByTable(const char *name, int numinputs, cons
 LogicFunction::~LogicFunction()
 {
 	LogicFunctionList::remove(this);
-	free(m_name);
+	free((char *)m_name);
 }
 
 LogicFunction *LogicFunction::findFunction(const char *name)
@@ -106,31 +106,31 @@ char LogicFunctionByTable::calculate(char *inputs)
 	return 'x';
 }
 
-char HorizontalCubeLogicFunction::calculate(char *inputs) {
-    for(int i=0; i<m_cubesize; i++){
-        for(int j=0; j<m_cubesize-1-j; j++)
-            if(inputs[i*m_cubesize + j] != inputs[i*m_cubesize + m_cubesize-1-j])
+char HorizontalSymmetricSquareLogicFunction::calculate(char *inputs) {
+    for(int i=0; i<m_square_size; i++){
+        for(int j=0; j<m_square_size-1-j; j++)
+            if(inputs[i*m_square_size + j] != inputs[i*m_square_size + m_square_size-1-j])
                 return 'f';
     }
     return 't';
 }
 
-char VerticalCubeLogicFunction::calculate(char *inputs) {
-    for(int j=0; j<m_cubesize; j++){
-        for(int i=0; i<m_cubesize-1-i; i++)
-            if(inputs[i*m_cubesize+j] != inputs[(m_cubesize-1-i)*m_cubesize+j])
+char VerticalSymmetricSquareLogicFunction::calculate(char *inputs) {
+    for(int j=0; j<m_square_size; j++){
+        for(int i=0; i<m_square_size-1-i; i++)
+            if(inputs[i*m_square_size+j] != inputs[(m_square_size-1-i)*m_square_size+j])
                 return 'f';
     }
     return 't';
 }
 
 
-char RotateCubeLogicFunction::calculate(char *inputs) {
+char RotateSymmetricSquareLogicFunction::calculate(char *inputs) {
     // (i, j) -> (j, n-1-i) -> (n-1-i, n-1-j) -> (n-1-j, i)
-    for(int i=0; i<m_cubesize; i++)
-        for(int j=0; j<m_cubesize; j++){
-            int from = i*m_cubesize + j;
-            int to = j*m_cubesize + m_cubesize-1-i;
+    for(int i=0; i<m_square_size; i++)
+        for(int j=0; j<m_square_size; j++){
+            int from = i*m_square_size + j;
+            int to = j*m_square_size + m_square_size-1-i;
             if(inputs[from] != inputs[to])
                 return 'f';
         }
@@ -140,9 +140,9 @@ char RotateCubeLogicFunction::calculate(char *inputs) {
 LogicProcessor::LogicProcessor( LogicFunction *function )
 	: m_logicfunction ( function )
 {
-	m_inputsources = new char * [ function->m_numinputs ];
-	m_inputfunctions = new LogicProcessor * [ function->m_numinputs ];
-	for (int i=0; i<function->m_numinputs; i++)
+	m_inputsources = new char * [ function->numinputs() ];
+	m_inputfunctions = new LogicProcessor * [ function->numinputs() ];
+	for (int i=0; i<function->numinputs(); i++)
 	{
 		m_inputsources[i] = 0;
 		m_inputfunctions[i] = 0;
@@ -168,9 +168,9 @@ void LogicProcessor::setInput(int input, char * source)
 
 char LogicProcessor::process()
 {
-	char *inputs = new char [ m_logicfunction->m_numinputs ];
+	char *inputs = new char [ m_logicfunction->numinputs() ];
 
-	for (int i=0;i<m_logicfunction->m_numinputs;i++)
+	for (int i=0;i<m_logicfunction->numinputs();i++)
 	{
 		inputs[i] =  m_inputsources[i] ? *m_inputsources[i] :
 			m_inputfunctions[i] ? m_inputfunctions[i]->process() : 'x';

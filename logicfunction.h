@@ -3,80 +3,108 @@
 #define LOGICFUNCTION_H
 
 
+// Represent a bitwise logic function that takes k(numinputs) bool value inputs, and outputs a single bool value result
+// For example: and/or/xor are logic functions takes 2 inputs, 'not' is a logic function take 1 input
+// Here inputs/output use char to represent the bool value: 't'(true),'f'(false),'x'(unknown)
+// This is an abstract base class with the pure virtual function calculate() to be implemented.
 class LogicFunction {
 public:
-
-    // a bitwise logic function takes k(numinputs) bool value inputs, and outputs a single bool value result
-    // for example: and/or/xor are logic functions takes 2 inputs, 'not' is a logic function take 1 input
-	// here inputs/output use char to represent the bool value: 't'(true),'f'(false),'x'(unknown)
-
 	LogicFunction(const char *name, int numinputs);
-	~LogicFunction();
+	virtual ~LogicFunction();
 
 	static LogicFunction *findFunction(const char *name);
+	virtual char calculate(char *inputs) = 0;
+	const char *name()const { return m_name; }
+    int numinputs()const { return m_numinputs; }
 
-    // calculate the logic function result of the numinputs inputs: 't'(true) or 'f'(false) or 'x'(unknown -- cannot be inferred from existing rules):
-	virtual char calculate(char *inputs){ return 'x'; };
-
-	int m_numinputs;
-	char *m_name;
+protected:
+	const int m_numinputs;
+	const char *m_name;
 };
 
+// LogicFunctionByTable is a LogicFunction implemented by a truth table.
+// The truth table defines its calculation rules, each line table[i] represent a rule with numinputs+1 chars(t/f/x):
+//    rule_i_input = table[i][0~(numinputs-1)], rule_i_output = table[i][numinputs]
+// for example:
+//    LogicFunctionByTable f_and2("and2",2, {"txt", "xtt", "fff", 0})
+//    table line "txt" means f(true, any_value) => true
+//    table line "fff" means f(false, false) => false
+// (!!!remind!!!: the last line of table should be 0 to indicate the end of table)
 class LogicFunctionByTable: public LogicFunction{
 public:
-    // @parameter table:
-    //   table defines its calculation rules, each line a rule: input = line[0:n-1], output = line[n-1]
-    //   each line are a string of numinputs inputs + resulting output
-    //   for example:
-    //      LogicFunction f_and2("and2",2, {"txt", "xtt", "fff", 0})
-    //      "txt" means f(true, any_value) = true
-    //      "fff" means f(false, false) = false
-    //   (!!!remind!!!: the last line of table should be 0 to indicate the end of table)
     LogicFunctionByTable(const char *name, int numinputs, const char **table);
     char calculate(char *inputs);
+
+private:
     const char **m_table;
 };
 
-class CubeLogicFunction: public LogicFunction {
+// SquareLogicFunction will take the inputs array with k^2 chars to represent a k*k bitwise square
+class SquareLogicFunction: public LogicFunction {
 public:
-    CubeLogicFunction(const char *name, int cubeSize):
-        m_cubesize(cubeSize),LogicFunction(name, cubeSize*cubeSize){}
-    char calculate(char *inputs){ return 'x'; }
-    int m_cubesize;
+    SquareLogicFunction(const char *name, int square_size):
+        m_square_size(square_size),LogicFunction(name, square_size*square_size){}
+
+protected:
+    const int m_square_size;
 };
 
-class HorizontalCubeLogicFunction: public CubeLogicFunction {
+// Calculate if the bitwise square is horizontal symmetric
+class HorizontalSymmetricSquareLogicFunction: public SquareLogicFunction {
 public:
-    HorizontalCubeLogicFunction(const char *name, int cubeSize): CubeLogicFunction(name, cubeSize){}
+    HorizontalSymmetricSquareLogicFunction(const char *name, int square_size): SquareLogicFunction(name, square_size){}
     char calculate(char *inputs);
 };
 
-class VerticalCubeLogicFunction: public CubeLogicFunction {
+class VerticalSymmetricSquareLogicFunction: public SquareLogicFunction {
 public:
-    VerticalCubeLogicFunction(const char *name, int cubeSize): CubeLogicFunction(name, cubeSize){}
+    VerticalSymmetricSquareLogicFunction(const char *name, int square_size): SquareLogicFunction(name, square_size){}
     char calculate(char *inputs);
 };
 
-class RotateCubeLogicFunction: public CubeLogicFunction {
+class RotateSymmetricSquareLogicFunction: public SquareLogicFunction {
 public:
-    RotateCubeLogicFunction(const char *name, int cubeSize): CubeLogicFunction(name, cubeSize){}
+    RotateSymmetricSquareLogicFunction(const char *name, int square_size): SquareLogicFunction(name, square_size){}
     char calculate(char *inputs);
 };
 
+
+// LogicProcessor represent complex bitwise formulas(making LogicFunction composable):
+//   LogicFunction takes only char(true/false) value
+//   But LogicProcessor could take inputs that each one could either be raw char(t/f) or a LogicProcessor
+// After setting up input sources(raw value or sub logicProcessor), every time calling process() would return the result(t/f/x) of current inputs' values
+//
+// For example, a bitwise formula of 3 inputs: !(inputs[0] && inputs[1]) || inputs[2]
+//   (Given existing LogicFunction lf_and, lf_or, lf_not
+//   char inputs[3];
+//
+//   LogicProcessor lp_and(&lf_and)
+//   and.setInput(0, inputs+0)
+//   and.setInput(1, inputs+1)
+//
+//   LogicProcessor lp_not_and(&lf_not)
+//   not_and.setInput(0, &lp_and)
+//
+//   LogicProcessor lp_composed(&lf_or)
+//   composed.setInput(0, &lp_not_and)
+//   composed.setInput(1, inputs+2)
+//
+//   //...each time assign values to the inputs[3]
+//   lp_composed.process()
 class LogicProcessor {
 public:
 	LogicProcessor( LogicFunction *function );
 	~LogicProcessor();
 
-    // each input could be a sub formula(LogicFunction) or a raw value(true/false):
 	void setInput(int input, LogicProcessor *lf);
 	void setInput(int input, char * source);
 
 	char process();
 
-	char **m_inputsources;
-	LogicProcessor **m_inputfunctions;
-	LogicFunction *m_logicfunction;
+private:
+    char **m_inputsources;
+    LogicProcessor **m_inputfunctions;
+    LogicFunction *m_logicfunction;
 };
 
 #endif // LOGICFUNCTION_H

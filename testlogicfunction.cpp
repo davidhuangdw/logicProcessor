@@ -98,9 +98,9 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 			printf("%c ", inp[i]);
 		printf(" -> %c\n", proc->process());
 
+        // iterate all permutations by +1 each round: ttftf -> ffttf: "11010"(as reversed number 01011) => "00110"(01100)
 		for (i=0 ; i<n; i++)
 		{
-            // iterate all permutations by +1 each round: ttftf -> ffttf: "11010"(as reversed number 01011) => "00110"(01100)
 			if (inp[i] == 'f')
 			{
 				inp[i] = 't';
@@ -120,10 +120,10 @@ void processor_test(LogicProcessor *proc, int n, char *inp)
 void function_test ( LogicFunction *func )
 {
 	char *inp;
-	char n=func->m_numinputs;
+	char n=func->numinputs();
 	LogicProcessor proc(func);
 
-	printf("Testing function: %s\n", func->m_name);
+	printf("Testing function: %s\n", func->name());
 	inp = new char [n];
 	for (int i=0; i<n; i++)
 	{
@@ -193,32 +193,36 @@ int main()
 		processor_test(&p_and, 3, inputs);
 	}
 
-// cube tests:
-    int cube_size = 8;
-    HorizontalCubeLogicFunction horizontal("horizontal_symmetric", cube_size);
-    VerticalCubeLogicFunction vertical("vertical_symmetric", cube_size);
-    RotateCubeLogicFunction rotate("rotate_symmetric", cube_size);
-    LogicProcessor p_hori(&horizontal), p_vert(&vertical), p_rotate(&rotate);
+// square tests:
+    {
+        const int square_size = 8;
+        const int input_size = square_size*square_size;
+        HorizontalSymmetricSquareLogicFunction horizontal("horizontal_symmetric", square_size);
+        VerticalSymmetricSquareLogicFunction vertical("vertical_symmetric", square_size);
+        RotateSymmetricSquareLogicFunction rotate("rotate_symmetric", square_size);
+        LogicProcessor p_hori(&horizontal), p_vert(&vertical), p_rotate(&rotate);
 
-    char cube[cube_size*cube_size];
-    for(int j=0; j<cube_size*cube_size; j++){
-        p_hori.setInput(j, cube+j);
-        p_vert.setInput(j, cube+j);
-        p_rotate.setInput(j, cube+j);
-    }
-
-    for(int i=0; i < sizeof(testcases)/ sizeof(testcases[0]); i++){
-        printf("test case %i:\n", i);
-        for(int row=0; row<cube_size; row++) {
-            for (int col = 0; col < cube_size; col++) {
-                int j = row*cube_size+col;
-                cube[j] = testcases[i][j];
-                printf("%c", cube[j]);
-            }
-            printf("\n");
+        char inputs[input_size];
+        for (int j = 0; j < input_size; j++) {
+            p_hori.setInput(j, inputs + j);
+            p_vert.setInput(j, inputs + j);
+            p_rotate.setInput(j, inputs + j);
         }
-        printf("--> horizontal: %c, vertical: %c, ratate: %c\n", p_hori.process(), p_vert.process(), p_rotate.process());
-        printf("---\n");
+
+        for (int i = 0; i < sizeof(testcases) / sizeof(testcases[0]); i++) {
+            printf("test case %i:\n", i);
+            for (int row = 0; row < square_size; row++) {
+                for (int col = 0; col < square_size; col++) {
+                    int j = row * square_size + col;
+                    inputs[j] = testcases[i][j];
+                    printf("%c", inputs[j]);
+                }
+                printf("\n");
+            }
+            printf("--> horizontal: %c, vertical: %c, ratate: %c\n", p_hori.process(), p_vert.process(),
+                   p_rotate.process());
+            printf("---\n");
+        }
     }
 
 }
