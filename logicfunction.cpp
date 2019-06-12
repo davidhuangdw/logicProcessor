@@ -35,17 +35,20 @@ void LogicFunctionList::insert(LogicFunction *f)
 
 void LogicFunctionList::remove(LogicFunction *f)
 {
-	for (LogicFunctionElm **elm=&head; *elm; elm=&((*elm)->m_next))
-	{
-		if ( (*elm)->m_function == f)
-		{
-			LogicFunctionElm *next = (*elm)->m_next;
-			delete (*elm);
-			(*elm) = next;
-//            if(!*elm) break;
-            return;
-		}
-	}
+    LogicFunctionElm **elm=&head;
+    while(*elm){
+        if ((*elm)->m_function == f)
+        {
+            LogicFunctionElm *next = (*elm)->m_next;
+            delete (*elm);
+            (*elm) = next;
+            //return;       # fix: don't return directly, allow f occurs more than once in the list
+        }
+        else
+        {
+            elm=&((*elm)->m_next);
+        }
+    }
 }
 
 LogicFunction *LogicFunctionList::find(const char *name)
