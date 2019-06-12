@@ -107,28 +107,36 @@ char LogicFunctionByTable::calculate(char *inputs)
 }
 
 char HorizontalSymmetricSquareLogicFunction::calculate(char *inputs) {
-    for(int i=0; i<m_square_size; i++){
-        for(int j=0; j<m_square_size-1-j; j++)
-            if(inputs[i*m_square_size + j] != inputs[i*m_square_size + m_square_size-1-j])
+    char *row = inputs;
+    for(int i=0; i < m_square_size; i++){
+        for(int j=0; j < m_square_size/2; j++) {
+            if (*(row + j) != *(row + m_square_size - 1 - j)) {
                 return 'f';
+            }
+        }
+        row += m_square_size;
     }
     return 't';
 }
 
 char VerticalSymmetricSquareLogicFunction::calculate(char *inputs) {
-    for(int j=0; j<m_square_size; j++){
-        for(int i=0; i<m_square_size-1-i; i++)
-            if(inputs[i*m_square_size+j] != inputs[(m_square_size-1-i)*m_square_size+j])
+    char *upper_row=inputs, *down_row=inputs+m_square_size*(m_square_size-1);
+    for(int i=0; i < m_square_size/2; i++){
+        for(int j=0; j < m_square_size; j++) {
+            if (*(upper_row + j) != *(down_row + j)) {
                 return 'f';
+            }
+        }
+        upper_row += m_square_size;
+        down_row  -= m_square_size;
     }
     return 't';
 }
 
-
 char RotateSymmetricSquareLogicFunction::calculate(char *inputs) {
     // (i, j) -> (j, n-1-i) -> (n-1-i, n-1-j) -> (n-1-j, i)
-    for(int i=0; i<m_square_size; i++)
-        for(int j=0; j<m_square_size; j++){
+    for(int i=0; i < m_square_size; i++)
+        for(int j=0; j < m_square_size; j++){
             int from = i*m_square_size + j;
             int to = j*m_square_size + m_square_size-1-i;
             if(inputs[from] != inputs[to])
